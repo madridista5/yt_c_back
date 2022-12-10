@@ -1,8 +1,8 @@
-import {Request, Response} from "express";
+import {NextFunction, Request, Response} from "express";
 import User from "../models/User";
 import bcrypt from 'bcryptjs';
 
-export const signUp = async (req: Request, res: Response) => {
+export const signUp = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const salt = bcrypt.genSaltSync(10);
         const hash = bcrypt.hashSync(req.body.password, salt);
@@ -13,6 +13,6 @@ export const signUp = async (req: Request, res: Response) => {
         await newUser.save();
         res.status(200).send('User has been created.');
     } catch (err) {
-
+        next(err);
     }
 };
