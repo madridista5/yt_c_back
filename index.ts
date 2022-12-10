@@ -5,9 +5,11 @@ import {commentRouter} from "./routes/commentRouter";
 import {videoRouter} from "./routes/videoRouter";
 import {authRouter} from "./routes/authRouter";
 import {myError} from "./utils/error";
+import cookieParser from "cookie-parser";
 
 const app = express();
 
+app.use(cookieParser());
 app.use(json());
 
 app.use('/api/auth', authRouter);

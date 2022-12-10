@@ -1,6 +1,11 @@
 import {NextFunction, Request, Response} from "express";
 import User from "../models/User";
 import bcrypt from 'bcryptjs';
+import {createError} from "../utils/error";
+import jwt from 'jsonwebtoken';
+import dotenv from "dotenv";
+
+dotenv.config();
 
 export const signUp = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -12,6 +17,29 @@ export const signUp = async (req: Request, res: Response, next: NextFunction) =>
         });
         await newUser.save();
         res.status(200).send('User has been created.');
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const signIn = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const user = await User.findOne({name: req.body.name});
+        if (!user) return next(createError(404, 'User not found!'));
+
+        const isCorrect = await bcrypt.compare(req.body.password, user.password);
+        if (!isCorrect) return next(createError(400, 'Wrong password!'));
+
+        const token = jwt.sign({id: user._id}, process.env.SECRET_KEY);
+        //@ts-ignore
+        const {password, ...others} = user._doc;
+
+        res
+            .cookie('access_token', token, {
+                httpOnly: true,
+            })
+            .status(200)
+            .json(others);
     } catch (err) {
         next(err);
     }
