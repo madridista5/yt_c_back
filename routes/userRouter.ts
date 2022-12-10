@@ -1,7 +1,13 @@
 import express from "express";
-import {test} from "../controllers/userController";
+import {deleteUser, dislike, getUser, like, subscribe, unsubscribe, update} from "../controllers/userController";
 
 export const userRouter = express.Router();
 
 userRouter
-    .get('/test', test);
+    .post('/:id', update)
+    .delete('/:id', deleteUser)
+    .get('/find/:id', getUser)
+    .put('/sub/:id', subscribe)
+    .put('/unsub/:id', unsubscribe)
+    .put('/like/:videoId', like)
+    .put('/dislike/:videoId', dislike);
