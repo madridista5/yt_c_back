@@ -1,22 +1,33 @@
-import express, {json, Request, Response} from "express";
+import express, {json, NextFunction, Request, Response} from "express";
 import {connect} from "./utils/db";
 import {userRouter} from "./routes/userRouter";
 import {commentRouter} from "./routes/commentRouter";
 import {videoRouter} from "./routes/videoRouter";
+import {authRouter} from "./routes/authRouter";
+import {myError} from "./utils/error";
+import cookieParser from "cookie-parser";
 
 const app = express();
 
+app.use(cookieParser());
 app.use(json());
 
-app.get('/', (req: Request, res: Response) => {
-    res.send('ok');
-});
-
+app.use('/api/auth', authRouter);
 app.use('/api/users', userRouter);
 app.use('/api/comments', commentRouter);
 app.use('/api/videos', videoRouter);
 
-app.listen(3001, '0.0.0.0', () => {
-    connect();
+app.use((err: myError, req: Request, res: Response, next: NextFunction) => {
+   const status = err.status || 500;
+   const message = err.message || 'Something went wrong!';
+   res.status(status).json({
+       success: false,
+       status,
+       message,
+   });
+});
+
+app.listen(3001, '0.0.0.0', async () => {
+    await connect();
     console.log('Listening on http://localhost:3001');
 });
