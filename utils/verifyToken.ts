@@ -12,5 +12,5 @@ export const verifyToken = (req: IGetUserAuthInfoRequest, res: Response, next: N
         if(err) return next(createError(403, 'Token is not valid'));
         req.user = user;
         next();
-    })
+    });
 }
