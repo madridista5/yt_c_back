@@ -2,6 +2,7 @@ import {NextFunction, Request, Response} from "express";
 import {createError} from "../utils/error";
 import User from "../models/User";
 import {IGetUserAuthInfoRequest} from "../types/userAuthResponseInterface";
+import Video from "../models/Video";
 
 export const update = async (req: IGetUserAuthInfoRequest, res: Response, next: NextFunction) => {
     if(req.params.id === req.user.id) {
@@ -73,17 +74,30 @@ export const unsubscribe = async (req: IGetUserAuthInfoRequest, res: Response, n
     }
 };
 
-export const like = async (req: Request, res: Response, next: NextFunction) => {
+export const like = async (req: IGetUserAuthInfoRequest, res: Response, next: NextFunction) => {
+    const id = req.user.id;
+    const videoId = req.params.videoId;
     try {
-
+        await Video.findByIdAndUpdate(videoId, {
+            // add to set - that means you can only like a video once
+            $addToSet: {likes: id},
+            $pull: {dislikes: id},
+        });
+        res.status(200).json('The video has been liked.');
     } catch (err) {
         next(err);
     }
 };
 
-export const dislike = async (req: Request, res: Response, next: NextFunction) => {
+export const dislike = async (req: IGetUserAuthInfoRequest, res: Response, next: NextFunction) => {
+    const id = req.user.id;
+    const videoId = req.params.videoId;
     try {
-
+        await Video.findByIdAndUpdate(videoId, {
+            $addToSet: {dislikes: id},
+            $pull: {likes: id},
+        });
+        res.status(200).json('The video has been disliked.');
     } catch (err) {
         next(err);
     }
