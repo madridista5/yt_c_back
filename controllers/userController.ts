@@ -34,9 +34,9 @@ export const deleteUser = async (req: IGetUserAuthInfoRequest, res: Response, ne
 export const getUser = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const user = await User.findById(req.params.id);
-        // if(!user) {
-        //     return createError(404, 'The user does not exist!');
-        // }
+        if(!user) {
+            return next(createError(404, 'The user does not exist!'));
+        }
         res.status(200).json(user);
     } catch (err) {
         next(err);
@@ -46,7 +46,7 @@ export const getUser = async (req: Request, res: Response, next: NextFunction) =
 export const subscribe = async (req: IGetUserAuthInfoRequest, res: Response, next: NextFunction) => {
     try {
         // adding video id to the user
-        await User.findById(req.user.id, {
+        await User.findByIdAndUpdate(req.user.id, {
             $push: {subscribeUsers: req.params.id},
         });
         // increasing subscribes number
@@ -61,7 +61,7 @@ export const subscribe = async (req: IGetUserAuthInfoRequest, res: Response, nex
 
 export const unsubscribe = async (req: IGetUserAuthInfoRequest, res: Response, next: NextFunction) => {
     try {
-        await User.findById(req.user.id, {
+        await User.findByIdAndUpdate(req.user.id, {
             $pull: {subscribeUsers: req.params.id},
         });
         await User.findByIdAndUpdate(req.params.id, {
